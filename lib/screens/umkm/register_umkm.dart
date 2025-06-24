@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../home/beranda_screen.dart'; // ganti sesuai path
+import '../home/beranda_screen.dart'; // Ganti dengan path kamu jika berbeda
 
 class RegisterUmkmScreen extends StatefulWidget {
   const RegisterUmkmScreen({super.key});
@@ -14,176 +14,200 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
   final TextEditingController _hargaController = TextEditingController();
   final TextEditingController _deskripsiController = TextEditingController();
 
-  // Placeholder untuk upload file
-  String _fileName = 'Choose File';
+  // TODO: Tambahkan fungsi picker dan Firebase upload jika sudah setup
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implementasi Firebase simpan data di sini
+      // TODO: Simpan data ke Firebase nanti
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produk berhasil ditambahkan')),
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const BerandaScreen()),
-      );
+      Navigator.pop(context); // Kembali ke beranda
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6E3CB),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text(
-          'Register UMKM',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            fontFamily: 'Inter',
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Color(0xFFE6E3CB),
-        ),
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE6E3CB),
-              borderRadius: BorderRadius.circular(28),
+      backgroundColor: const Color(0xFFFFFFFF),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header: Back + Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: SizedBox(
+                height: 28,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () =>
+                            Navigator.pushReplacementNamed(context, '/beranda'),
+                        child: const Icon(Icons.arrow_back, size: 28),
+                      ),
+                    ),
+                    const Center(
+                      child: Text(
+                        'Register UMKM',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  const Text(
-                    'Tambahkan Produk UMKM',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: 'Inter',
-                    ),
+
+            // Body Container
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE6E3CB),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
-                  const SizedBox(height: 30),
-                  _buildLabel('Nama UMKM'),
-                  _buildTextField(_namaController, 'Nama produk UMKM'),
-                  const SizedBox(height: 20),
-                  _buildLabel('Harga UMKM'),
-                  _buildTextField(_hargaController, 'Harga produk'),
-                  const SizedBox(height: 20),
-                  _buildLabel('Deskripsi UMKM'),
-                  _buildTextField(_deskripsiController, 'Deskripsi produk',
-                      maxLines: 5),
-                  const SizedBox(height: 20),
-                  _buildLabel('Foto Produk'),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
+                ),
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 30),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // TODO: Tambah image picker logic
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFD9D9D9),
-                          ),
-                          child: const Text(
-                            'Choose File',
-                            style: TextStyle(color: Colors.black),
+                        const Center(
+                          child: Text(
+                            'Tambahkan Produk UMKM',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          _fileName,
-                          style: const TextStyle(fontSize: 14),
+                        const SizedBox(height: 30),
+                        _buildLabel('Nama UMKM'),
+                        _buildInput(_namaController),
+                        const SizedBox(height: 20),
+                        _buildLabel('Harga UMKM'),
+                        _buildInput(_hargaController,
+                            keyboardType: TextInputType.number),
+                        const SizedBox(height: 20),
+                        _buildLabel('Deskripsi UMKM'),
+                        _buildInput(_deskripsiController, maxLines: 4),
+                        const SizedBox(height: 20),
+                        _buildLabel('Foto Produk'),
+                        Container(
+                          height: 60,
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: const Color(0xFF5B5835)),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // TODO: Tambahkan fungsi pilih gambar
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFD2D2D2),
+                              elevation: 1,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius
+                                    .zero, // sudut kotak (tidak melengkung)
+                              ),
+                              fixedSize: const Size(50,
+                                  45), // atur ukuran: lebar = 150, tinggi = 45
+                            ),
+                            child: const Text(
+                              'Choose File',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Poppins',
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Center(
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 55,
+                            child: ElevatedButton(
+                              onPressed: _submitForm,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF5B5835),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: const Text(
+                                'Tambah Produk',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: _submitForm,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5B5835),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: const Text(
-                        'Tambah Produk',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          fontFamily: 'Inter',
-        ),
+  Widget _buildLabel(String label) {
+    return Text(
+      label,
+      style: const TextStyle(
+        fontSize: 15,
+        fontFamily: 'Poppins',
+        fontWeight: FontWeight.w500,
       ),
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String hintText, {
+  Widget _buildInput(
+    TextEditingController controller, {
     int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
   }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        hintText: hintText,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+    return Container(
+      width: double.infinity,
+      height: maxLines == 1 ? 60 : 137,
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFF5B5835)),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: TextFormField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: keyboardType,
+        validator: (value) =>
+            value == null || value.isEmpty ? 'Wajib diisi' : null,
+        decoration: const InputDecoration(
+          border: InputBorder.none,
         ),
       ),
-      validator: (value) =>
-          value == null || value.isEmpty ? 'Wajib diisi' : null,
     );
   }
 }

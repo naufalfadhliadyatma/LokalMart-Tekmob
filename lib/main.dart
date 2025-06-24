@@ -4,7 +4,8 @@ import 'screens/home/beranda_screen.dart'; // Beranda
 import 'screens/home/sejarah_screen.dart';
 // import 'screens/umkm/daftar_umkm_screen.dart';
 import 'screens/umkm/register_umkm.dart';
-// import 'screens/profile/profile_screen.dart';
+import 'screens/profile/profile_screen.dart';
+import 'package:lokalmart/screens/umkm/daftar_umkm.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,7 +25,8 @@ class MyApp extends StatelessWidget {
         '/sejarah': (context) => const SejarahSriharjoScreen(),
         '/register': (context) => const RegisterUmkmScreen(),
         // '/umkm': (context) => const DaftarUMKMScreen(),
-        // '/profile': (context) => const ProfileScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/umkm': (context) => const DaftarUMKMScreen(),
       },
     );
   }

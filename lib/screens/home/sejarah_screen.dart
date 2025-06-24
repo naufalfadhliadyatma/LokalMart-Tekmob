@@ -6,48 +6,57 @@ class SejarahSriharjoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // AppBar Manual (Back + Title)
+            // Header: Back + Title
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Sejarah Sriharjo',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Inter',
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              child: SizedBox(
+                height: 28,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () =>
+                            Navigator.pushReplacementNamed(context, '/beranda'),
+                        child: const Icon(Icons.arrow_back, size: 28),
+                      ),
                     ),
-                  ),
-                ],
+                    const Center(
+                      child: Text(
+                        'Sejarah Sriharjo',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
-            // Isi Konten
+            // Body Container
             Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE6E3CB),
-                    borderRadius: BorderRadius.circular(20),
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE6E3CB),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Logo dan Judul
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -60,15 +69,14 @@ class SejarahSriharjoScreen extends StatelessWidget {
                           const Text(
                             'Kalurahan Sriharjo',
                             style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
                               fontFamily: 'Poppins',
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-
+                      const SizedBox(height: 20),
                       const Text(
                         'Sejarah Kalurahan Sriharjo',
                         style: TextStyle(
@@ -132,7 +140,6 @@ class SejarahSriharjoScreen extends StatelessWidget {
     );
   }
 
-  // Fungsi untuk membuat list bernomor
   Widget _buildNumberedList(List<String> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
