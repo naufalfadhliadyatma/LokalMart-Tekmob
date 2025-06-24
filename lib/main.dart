@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
         // '/umkm': (context) => const DaftarUMKMScreen(),
         '/profile': (context) => const ProfileScreen(),
         '/umkm': (context) => const DaftarUMKMScreen(),
+        '/awal': (context) => const LokalMartLogin(),
       },
     );
   }
