@@ -86,13 +86,18 @@ class BerandaScreen extends StatelessWidget {
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
+                    alignment: WrapAlignment.center,
                     children: [
+                      _cardItem('Srikeminut', 'assets/images/card-kali.png',
+                          'https://g.co/kgs/nPpj3dU'),
                       _cardItem(
-                          'Srikeminut', 'assets/images/card-kali.png', 124),
-                      _cardItem('Lembah Sorory',
-                          'assets/images/card-sorori.png', 124),
-                      _cardItem('Taman Girli Indah',
-                          'assets/images/card-Girli.png', 124),
+                          'Lembah Sorory',
+                          'assets/images/card-sorori.png',
+                          'https://g.co/kgs/fZxA3mE'),
+                      _cardItem(
+                          'Taman Girli Indah',
+                          'assets/images/card-Girli.png',
+                          'https://maps.app.goo.gl/4VTEmGdRroUU6X267'),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -101,13 +106,18 @@ class BerandaScreen extends StatelessWidget {
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
+                    alignment: WrapAlignment.center,
                     children: [
+                      _budayaItem('Sekar Wangi Tari', 'assets/images/Tari.png',
+                          'https://jdih.bantulkab.go.id/produkhukum/download/5492/2023/keputusan-bupati-2023-521.pdf.html'),
                       _budayaItem(
-                          'Sekar Wangi Tari', 'assets/images/Tari.png', 124),
-                      _budayaItem('Sholawat Mudo Palupi',
-                          'assets/images/card-sholawat.png', 124),
-                      _budayaItem('Jatilan Mudho Langgen',
-                          'assets/images/card-jatilan.png', 124),
+                          'Sholawat Mudo Palupi',
+                          'assets/images/card-sholawat.png',
+                          'https://youtu.be/0WtafW8amDk?si=g_Y7TDCD-IbaC1BF'),
+                      _budayaItem(
+                          'Jatilan Mudho Langgen',
+                          'assets/images/card-jatilan.png',
+                          'https://youtu.be/jDZf9wLp7sM?si=Xb-Bam3Hp8hH4B_V'),
                     ],
                   ),
                 ],
@@ -176,60 +186,64 @@ class BerandaScreen extends StatelessWidget {
     );
   }
 
-  Widget _cardItem(String title, String imagePath, double width) {
+  Widget _cardItem(String title, String imagePath, String url) {
     return Container(
-      width: width,
-      decoration: const BoxDecoration(
-        color: Color(0xFFB3AF8A),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
-        ),
+      width: 124,
+      decoration: BoxDecoration(
+        color: const Color(0xFFB3AF8A),
+        borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.all(6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
             ),
             child: Image.asset(
               imagePath,
+              height: 90,
               width: double.infinity,
-              height: 86,
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-            ),
-          ),
-          const SizedBox(height: 4),
-          GestureDetector(
-            onTap: () => _launchUrl('https://g.co/kgs/jEkQ6ad'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0xFF5B5835),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(Icons.location_on, size: 10, color: Colors.white),
-                  SizedBox(width: 2),
-                  Text('Lokasi',
-                      style: TextStyle(fontSize: 7, color: Colors.white)),
-                ],
-              ),
+          Padding(
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () => _launchUrl(url),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5B5835),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.location_on, size: 10, color: Colors.white),
+                        SizedBox(width: 2),
+                        Text('Lokasi',
+                            style: TextStyle(fontSize: 8, color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -237,56 +251,59 @@ class BerandaScreen extends StatelessWidget {
     );
   }
 
-  Widget _budayaItem(String title, String imagePath, double width) {
+  Widget _budayaItem(String title, String imagePath, String url) {
     return Container(
-      width: width,
-      decoration: const BoxDecoration(
-        color: Color(0xFFB3AF8A),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
-        ),
+      width: 124,
+      decoration: BoxDecoration(
+        color: const Color(0xFFB3AF8A),
+        borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.all(6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
             ),
             child: Image.asset(
               imagePath,
+              height: 90,
               width: double.infinity,
-              height: 85,
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-            ),
-          ),
-          const SizedBox(height: 4),
-          GestureDetector(
-            onTap: () =>
-                _launchUrl('https://youtu.be/0WtafW8amDk?si=_YcSZj2DdIG91IWf'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: const Color(0xFF5B5835),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: const Text(
-                'Selengkapnya',
-                style: TextStyle(fontSize: 6, color: Colors.white),
-              ),
+          Padding(
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () => _launchUrl(url),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5B5835),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'Selengkapnya',
+                      style: TextStyle(fontSize: 8, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
