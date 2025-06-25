@@ -39,7 +39,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   GestureDetector(
-                    onTap: () => _showEditProfileDialog(context),
+                    onTap: () => Navigator.pushNamed(context, '/editProfile'),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 6),

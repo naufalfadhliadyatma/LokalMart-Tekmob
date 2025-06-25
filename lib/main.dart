@@ -6,6 +6,7 @@ import 'screens/home/sejarah_screen.dart';
 import 'screens/umkm/register_umkm.dart';
 import 'screens/profile/profile_screen.dart';
 import 'package:lokalmart/screens/umkm/daftar_umkm.dart';
+import 'screens/profile/edit_profile.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         '/umkm': (context) => const DaftarUMKMScreen(),
         '/awal': (context) => const LokalMartLogin(),
+        '/editProfile': (context) => const EditProfileScreen(),
       },
     );
   }
