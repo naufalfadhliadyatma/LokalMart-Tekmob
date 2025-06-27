@@ -1,5 +1,10 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../home/beranda_screen.dart'; // Ganti dengan path kamu jika berbeda
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterUmkmScreen extends StatefulWidget {
   const RegisterUmkmScreen({super.key});
@@ -13,16 +18,65 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _hargaController = TextEditingController();
   final TextEditingController _deskripsiController = TextEditingController();
+  XFile? _selectedImage;
+  String? _uploadedImageUrl;
 
-  // TODO: Tambahkan fungsi picker dan Firebase upload jika sudah setup
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-  void _submitForm() {
+    if (pickedFile == null) return;
+
+    setState(() {
+      _selectedImage = pickedFile;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+          content: Text('Gambar dipilih, akan diupload saat submit')),
+    );
+  }
+
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Simpan data ke Firebase nanti
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Produk berhasil ditambahkan')),
-      );
-      Navigator.pop(context); // Kembali ke beranda
+      if (_selectedImage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Silakan pilih gambar terlebih dahulu')),
+        );
+        return;
+      }
+
+      try {
+        final fileBytes = await _selectedImage!.readAsBytes();
+        final fileExt = path.extension(_selectedImage!.path);
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}$fileExt';
+        final filePath = 'produk/$fileName';
+
+        final storage = Supabase.instance.client.storage;
+        await storage.from('gambar').uploadBinary(filePath, fileBytes);
+        final publicUrl = storage.from('gambar').getPublicUrl(filePath);
+
+        setState(() {
+          _uploadedImageUrl = publicUrl;
+        });
+
+        await Supabase.instance.client.from('registrasi_umkm').insert({
+          'nama': _namaController.text,
+          'harga': int.tryParse(_hargaController.text) ?? 0,
+          'deskripsi': _deskripsiController.text,
+          'image_url': publicUrl,
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Produk berhasil ditambahkan')),
+        );
+
+        Navigator.pop(context, true);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menambahkan produk: $e')),
+        );
+      }
     }
   }
 
@@ -33,7 +87,6 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header: Back + Title
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: SizedBox(
@@ -44,8 +97,7 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: GestureDetector(
-                        onTap: () =>
-                            Navigator.pushReplacementNamed(context, '/beranda'),
+                        onTap: () => Navigator.pop(context),
                         child: const Icon(Icons.arrow_back, size: 28),
                       ),
                     ),
@@ -63,8 +115,6 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
                 ),
               ),
             ),
-
-            // Body Container
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -98,8 +148,10 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
                         _buildInput(_namaController),
                         const SizedBox(height: 20),
                         _buildLabel('Harga UMKM'),
-                        _buildInput(_hargaController,
-                            keyboardType: TextInputType.number),
+                        _buildInput(
+                          _hargaController,
+                          keyboardType: TextInputType.number,
+                        ),
                         const SizedBox(height: 20),
                         _buildLabel('Deskripsi UMKM'),
                         _buildInput(_deskripsiController, maxLines: 4),
@@ -114,22 +166,20 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
                             borderRadius: BorderRadius.circular(2),
                           ),
                           child: ElevatedButton(
-                            onPressed: () {
-                              // TODO: Tambahkan fungsi pilih gambar
-                            },
+                            onPressed: _pickImage,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFD2D2D2),
                               elevation: 1,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius
-                                    .zero, // sudut kotak (tidak melengkung)
+                                borderRadius: BorderRadius.zero,
                               ),
-                              fixedSize: const Size(50,
-                                  45), // atur ukuran: lebar = 150, tinggi = 45
+                              fixedSize: const Size(50, 45),
                             ),
-                            child: const Text(
-                              'Choose File',
-                              style: TextStyle(
+                            child: Text(
+                              _selectedImage == null
+                                  ? 'Pilih Gambar'
+                                  : 'Ganti Gambar',
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontFamily: 'Poppins',
                                 fontSize: 15,
@@ -137,6 +187,27 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
                             ),
                           ),
                         ),
+
+                        /// ✅ Preview gambar sebelum submit
+                        if (_selectedImage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: kIsWeb
+                                  ? Image.network(
+                                      _selectedImage!.path,
+                                      height: 150,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.file(
+                                      File(_selectedImage!.path),
+                                      height: 150,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                          ),
+
                         const SizedBox(height: 30),
                         Center(
                           child: SizedBox(
@@ -202,8 +273,17 @@ class _RegisterUmkmScreenState extends State<RegisterUmkmScreen> {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
-        validator: (value) =>
-            value == null || value.isEmpty ? 'Wajib diisi' : null,
+        inputFormatters: keyboardType == TextInputType.number
+            ? [FilteringTextInputFormatter.digitsOnly]
+            : [],
+        validator: (value) {
+          if (value == null || value.isEmpty) return 'Wajib diisi';
+          if (keyboardType == TextInputType.number &&
+              int.tryParse(value) == null) {
+            return 'Harus berupa angka';
+          }
+          return null;
+        },
         decoration: const InputDecoration(
           border: InputBorder.none,
         ),

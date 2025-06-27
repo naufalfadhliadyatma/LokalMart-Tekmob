@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DaftarUMKMScreen extends StatefulWidget {
   const DaftarUMKMScreen({super.key});
@@ -9,62 +10,44 @@ class DaftarUMKMScreen extends StatefulWidget {
 
 class _DaftarUMKMScreenState extends State<DaftarUMKMScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final List<Map<String, String>> produkUMKM = [
-    {
-      'nama': 'Keripik Tempe',
-      'harga': 'Rp 15.000',
-      'deskripsi': 'Keripik enak yang dibuat dari tempe berkualitas',
-      'gambar': 'assets/images/keripik.png'
-    },
-    {
-      'nama': 'Mie Ayam',
-      'harga': 'Rp 10.000',
-      'deskripsi': 'Mie Ayam Bu Tuti dengan tekstur mie yang berkualitas',
-      'gambar': 'assets/images/mie-ayam.png'
-    },
-    {
-      'nama': 'Kerajinan Kayu',
-      'harga': 'Rp 300.000',
-      'deskripsi': 'Keripik enak yang dibuat dari kayu berkualitas',
-      'gambar': 'assets/images/kerajinan-kayu.png'
-    },
-    {
-      'nama': 'Rempeyek',
-      'harga': 'Rp 9.000',
-      'deskripsi': 'Rempeyek Bu Indah dengan kacang berkualitas',
-      'gambar': 'assets/images/rempeyek.png'
-    },
-    {
-      'nama': 'Angkringan',
-      'harga': 'Rp 5.000',
-      'deskripsi': 'Angkringan pak keman yang murah dan lengkap',
-      'gambar': 'assets/images/angkringan.png'
-    },
-    {
-      'nama': 'Wedang Uwuh',
-      'harga': 'Rp 10.000',
-      'deskripsi': 'Wedang uwuh pak gun dengan rempah berkualitas',
-      'gambar': 'assets/images/Wedang-uwuh.png'
-    },
-  ];
-
-  List<Map<String, String>> _filteredProduk = [];
+  List<Map<String, dynamic>> produkUMKM = [];
+  List<Map<String, dynamic>> _filteredProduk = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _filteredProduk = List.from(produkUMKM);
+    fetchProduk();
 
     _searchController.addListener(() {
       final keyword = _searchController.text.toLowerCase();
       setState(() {
         _filteredProduk = produkUMKM
             .where((produk) =>
-                produk['nama']!.toLowerCase().contains(keyword) ||
-                produk['deskripsi']!.toLowerCase().contains(keyword))
+                (produk['nama'] ?? '').toLowerCase().contains(keyword) ||
+                (produk['deskripsi'] ?? '').toLowerCase().contains(keyword))
             .toList();
       });
     });
+  }
+
+  Future<void> fetchProduk() async {
+    try {
+      final data = await Supabase.instance.client
+          .from('registrasi_umkm')
+          .select()
+          .order('id', ascending: false);
+
+      setState(() {
+        produkUMKM = List<Map<String, dynamic>>.from(data);
+        _filteredProduk = List.from(produkUMKM);
+        _isLoading = false;
+      });
+    } catch (e, stack) {
+      print('❌ Error fetchProduk: $e');
+      print('📍 Stacktrace: $stack');
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -77,19 +60,32 @@ class _DaftarUMKMScreenState extends State<DaftarUMKMScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE6E3CB),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFE6E3CB),
+        elevation: 0,
+        title: const Text(
+          'UMKM Kalurahan Sriharjo',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Poppins',
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              setState(() => _isLoading = true);
+              fetchProduk();
+            },
+          ),
+        ],
+      ),
       body: Padding(
-        padding: const EdgeInsets.only(top: 50, left: 16, right: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'UMKM Kalurahan Sriharjo',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                fontFamily: 'Poppins',
-              ),
-            ),
             const Text(
               'Temukan Produk UMKM Kesukaanmu!',
               style: TextStyle(
@@ -115,7 +111,7 @@ class _DaftarUMKMScreenState extends State<DaftarUMKMScreen> {
                       controller: _searchController,
                       style: const TextStyle(fontSize: 12),
                       decoration: const InputDecoration(
-                        hintText: 'Mau cari umkm apa?',
+                        hintText: 'Mau cari UMKM apa?',
                         border: InputBorder.none,
                         isDense: true,
                       ),
@@ -126,89 +122,29 @@ class _DaftarUMKMScreenState extends State<DaftarUMKMScreen> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: _filteredProduk.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Produk tidak ditemukan',
-                        style: TextStyle(fontFamily: 'Poppins'),
-                      ),
-                    )
-                  : GridView.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.65,
-                      children: _filteredProduk.map((produk) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(12)),
-                                child: Image.asset(
-                                  produk['gambar']!,
-                                  height: 100,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      produk['nama']!,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                    Text(
-                                      produk['harga']!,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontFamily: 'Poppins',
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      produk['deskripsi']!,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontFamily: 'Poppins',
-                                        color: Colors.black54,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: const [
-                                        Icon(Icons.location_on, size: 16),
-                                        Icon(Icons.bookmark_border, size: 16),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _filteredProduk.isEmpty
+                      ? const Center(child: Text('Produk tidak ditemukan'))
+                      : GridView.count(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio:
+                              0.9, // atur proporsi agar lebih pendek
+                          children: _filteredProduk
+                              .map((produk) => _ItemCard(produk))
+                              .toList(),
+                        ),
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print('🪲 DEBUG PRODUK: $_filteredProduk');
+        },
+        child: const Icon(Icons.bug_report),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF5B5835),
@@ -219,7 +155,7 @@ class _DaftarUMKMScreenState extends State<DaftarUMKMScreen> {
           if (index == 0) {
             Navigator.pushNamed(context, '/beranda');
           } else if (index == 1) {
-            Navigator.pushNamed(context, '/umkm');
+            Navigator.pushReplacementNamed(context, '/umkm');
           } else if (index == 2) {
             Navigator.pushNamed(context, '/profile');
           }
@@ -229,6 +165,66 @@ class _DaftarUMKMScreenState extends State<DaftarUMKMScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.store), label: 'UMKM'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
+      ),
+    );
+  }
+}
+
+class _ItemCard extends StatelessWidget {
+  final Map<String, dynamic> data;
+  const _ItemCard(this.data);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: (data['image_url'] ?? '').toString().isNotEmpty
+                    ? Image.network(
+                        data['image_url'],
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.broken_image),
+                      )
+                    : const Icon(Icons.image_not_supported),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              data['nama'] ?? '',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              'Rp ${data['harga'] ?? 'N/A'}',
+              style: const TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              data['deskripsi'] ?? '',
+              style: const TextStyle(fontSize: 10),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const Spacer(),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(Icons.location_on, size: 16),
+                Icon(Icons.bookmark_border, size: 16),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
