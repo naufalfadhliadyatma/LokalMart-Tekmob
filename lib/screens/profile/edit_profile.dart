@@ -1,202 +1,241 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({Key? key}) : super(key: key);
+  const EditProfileScreen({super.key});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _currentPasswordController =
-      TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _namaController = TextEditingController();
+  final _alamatController = TextEditingController();
+  final _noTeleponController = TextEditingController();
+  String _jenisKelamin = 'Laki-laki';
 
-  File? _image;
+  String avatarUrl = '';
+  Uint8List? imageBytes;
+  String? fileName;
+  bool isLoading = false;
 
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    final data = await Supabase.instance.client
+        .from('profile')
+        .select('nama, alamat, no_telepon, jenis_kelamin, avatar_url')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (data != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _namaController.text = data['nama'] ?? '';
+        _alamatController.text = data['alamat'] ?? '';
+        _noTeleponController.text = data['no_telepon'] ?? '';
+        _jenisKelamin = data['jenis_kelamin'] ?? 'Laki-laki';
+        avatarUrl = data['avatar_url'] ?? '';
       });
     }
   }
 
-  void _removeImage() {
-    setState(() {
-      _image = null;
-    });
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      imageBytes = await picked.readAsBytes();
+      fileName = const Uuid().v4();
+      setState(() {
+        avatarUrl = '';
+      });
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    String? finalAvatarUrl = avatarUrl;
+
+    // Upload avatar baru ke Supabase Storage
+    if (imageBytes != null && fileName != null) {
+      final storage = Supabase.instance.client.storage;
+      final path = 'avatar/$fileName.jpg';
+
+      await storage.from('avatar').uploadBinary(
+            path,
+            imageBytes!,
+            fileOptions: const FileOptions(upsert: true),
+          );
+
+      finalAvatarUrl = storage.from('avatar').getPublicUrl(path);
+    }
+
+    // Update data ke Supabase
+    await Supabase.instance.client.from('profile').update({
+      'nama': _namaController.text.trim(),
+      'alamat': _alamatController.text.trim(),
+      'no_telepon': _noTeleponController.text.trim(),
+      'jenis_kelamin': _jenisKelamin,
+      'avatar_url': finalAvatarUrl,
+    }).eq('id', user.id);
+
+    setState(() => isLoading = false);
+    if (mounted) Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFE6E3CB),
       appBar: AppBar(
         backgroundColor: const Color(0xFF5B5835),
+        title: const Text('Edit Profil', style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      backgroundColor: const Color(0xFFE6E3CB),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            // Foto profil di tengah
-            Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: _image != null
-                    ? FileImage(_image!)
-                    : const AssetImage('assets/images/Avatar.png')
-                        as ImageProvider,
-              ),
-            ),
-            const SizedBox(height: 12),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(24),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      // Avatar
+                      GestureDetector(
+                        onTap: _pickImage,
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 45,
+                              backgroundColor: Colors.grey[300],
+                              backgroundImage: imageBytes != null
+                                  ? MemoryImage(imageBytes!)
+                                  : (avatarUrl.isNotEmpty
+                                          ? NetworkImage(avatarUrl)
+                                          : const AssetImage(
+                                              'assets/images/Avatar.png'))
+                                      as ImageProvider,
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF5B5835),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.edit,
+                                  size: 16, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
 
-            // Tombol Upload dan Remove
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _pickImage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5B5835),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Upload Foto',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                OutlinedButton(
-                  onPressed: _removeImage,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF5B5835),
-                    side: const BorderSide(color: Color(0xFF5B5835)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Remove',
-                    style: TextStyle(fontFamily: 'Poppins'),
-                  ),
-                ),
-              ],
-            ),
+                      // Input Nama
+                      _buildTextField(_namaController, 'Nama', validator: true),
+                      const SizedBox(height: 16),
 
-            const SizedBox(height: 24),
+                      // Input Alamat
+                      _buildTextField(_alamatController, 'Alamat',
+                          validator: true),
+                      const SizedBox(height: 16),
 
-            // Form Full Name
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Full Name',
-                labelStyle: const TextStyle(fontFamily: 'Poppins'),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
+                      // Input No Telepon
+                      _buildTextField(
+                        _noTeleponController,
+                        'No Telepon',
+                        keyboardType: TextInputType.phone,
+                        validator: true,
+                      ),
+                      const SizedBox(height: 16),
 
-            const SizedBox(height: 32),
+                      // Dropdown Jenis Kelamin
+                      DropdownButtonFormField<String>(
+                        value: _jenisKelamin,
+                        decoration: InputDecoration(
+                          labelText: 'Jenis Kelamin',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'Laki-laki', child: Text('Laki-laki')),
+                          DropdownMenuItem(
+                              value: 'Perempuan', child: Text('Perempuan')),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) setState(() => _jenisKelamin = val);
+                        },
+                      ),
+                      const SizedBox(height: 30),
 
-            // Change Password Section
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Change Password',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
-                  color: Colors.grey[800],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            TextField(
-              controller: _currentPasswordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Current Password',
-                labelStyle: const TextStyle(fontFamily: 'Poppins'),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _newPasswordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'New Password',
-                labelStyle: const TextStyle(fontFamily: 'Poppins'),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _confirmPasswordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Confirm New Password',
-                labelStyle: const TextStyle(fontFamily: 'Poppins'),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // Tombol Save
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Simpan perubahan
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF5B5835),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Text(
-                  'Simpan Perubahan',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
+                      // Tombol Simpan
+                      ElevatedButton(
+                        onPressed: _updateProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF5B5835),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Simpan Perubahan',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    TextInputType keyboardType = TextInputType.text,
+    bool validator = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: validator
+          ? (value) {
+              if (value == null || value.trim().isEmpty) {
+                return '$label tidak boleh kosong';
+              }
+              return null;
+            }
+          : null,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

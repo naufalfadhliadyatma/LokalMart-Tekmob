@@ -4,9 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Screens
 import 'package:lokalmart/screens/awal/awal_screen.dart';
 // Splash screen
+import 'screens/awal/signup_screen.dart';
 import 'package:lokalmart/screens/awal/login_screen.dart';
-// Login
-import 'screens/awal/signup_screen.dart'; // Sign Up
+// Login // Sign Up
 import 'screens/home/beranda_screen.dart'; // Beranda
 import 'screens/home/sejarah_screen.dart';
 import 'screens/umkm/register_umkm.dart';
@@ -14,6 +14,8 @@ import 'package:lokalmart/screens/umkm/daftar_umkm.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/profile/edit_profile.dart';
 import 'package:lokalmart/screens/profile/privacy_policy_screen.dart';
+import 'package:lokalmart/screens/profile/keamanan_screen.dart';
+import 'package:lokalmart/screens/profile/favorit_saya.dart'; // ← Tam
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +49,8 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
         '/editProfile': (context) => const EditProfileScreen(),
         '/kebijakan': (context) => const PrivacyPolicyScreen(),
+        '/keamanan': (context) => const KeamananScreen(),
+        '/favorite': (context) => const FavoritSayaScreen(),
       },
     );
   }
