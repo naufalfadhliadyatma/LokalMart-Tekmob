@@ -14,236 +14,491 @@ class BerandaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F6F0),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.asset(
-              'assets/images/Bg-Sriharjo.png',
-              width: double.infinity,
-              height: 300,
-              fit: BoxFit.cover,
-            ),
-            Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(32),
-                  topRight: Radius.circular(32),
+            // Enhanced Header with Gradient Overlay
+            Stack(
+              children: [
+                Image.asset(
+                  'assets/images/Bg-Sriharjo.png',
+                  width: double.infinity,
+                  height: 320,
+                  fit: BoxFit.cover,
                 ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+                Container(
+                  width: double.infinity,
+                  height: 320,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.3),
+                        Colors.transparent,
+                        const Color(0xFF5B5835).withOpacity(0.7),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 50,
+                  left: 20,
+                  right: 20,
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          _pillButton(
-                            'Sriharjo',
-                            const Color(0xFF5B5835),
-                            () => Navigator.pushNamed(context, '/sejarah'),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(25),
+                          border:
+                              Border.all(color: Colors.white.withOpacity(0.3)),
+                        ),
+                        child: const Text(
+                          'LokalMart Sriharjo',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Inter',
                           ),
-                          const SizedBox(width: 8),
-                          _pillButton(
-                            'Register',
-                            const Color(0xFFB3AF8A),
-                            () => Navigator.pushNamed(context, '/register'),
-                          ),
-                        ],
+                        ),
                       ),
                       InkWell(
                         onTap: () => _launchUrl('https://g.co/kgs/jEkQ6ad'),
-                        child: CircleAvatar(
-                          radius: 20,
-                          backgroundColor: const Color(0xFFB3AF8A),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.3)),
+                          ),
                           child: Image.asset(
                             'assets/images/Icons-Location.png',
-                            height: 27,
+                            height: 24,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'LokalMart menampilkan produk UMKM, budaya, dan pesona '
-                    'wisata Sriharjo lengkap dengan info lokasi dan kontak. Dukung '
-                    'produk lokal, lestarikan budaya, dan majukan ekonomi desa!',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF7E7C7C),
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
+                ),
+                Positioned(
+                  bottom: 30,
+                  left: 20,
+                  right: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Selamat Datang di',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      const Text(
+                        'Desa Sriharjo',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          _enhancedPillButton(
+                            'Pelajari Sejarah',
+                            const Color(0xFF2E7D32),
+                            Icons.history_edu,
+                            () => Navigator.pushNamed(context, '/sejarah'),
+                          ),
+                          const SizedBox(width: 12),
+                          _enhancedPillButton(
+                            'Daftar Sekarang',
+                            const Color(0xFF1976D2),
+                            Icons.app_registration,
+                            () => Navigator.pushNamed(context, '/register'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // Main Content with Enhanced Design
+            Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF8F6F0),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
+              ),
+              transform: Matrix4.translationValues(0, -20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Welcome Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF5B5835),
+                          const Color(0xFF5B5835).withOpacity(0.8),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF5B5835).withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.store,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Text(
+                                'Tentang LokalMart',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'LokalMart menampilkan produk UMKM, budaya, dan pesona wisata Sriharjo lengkap dengan info lokasi dan kontak. Dukung produk lokal, lestarikan budaya, dan majukan ekonomi desa!',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w400,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  _sectionTitle('Wisata Sriharjo'),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      _cardItem('Srikeminut', 'assets/images/card-kali.png',
-                          'https://g.co/kgs/nPpj3dU'),
-                      _cardItem(
-                          'Lembah Sorory',
-                          'assets/images/card-sorori.png',
-                          'https://g.co/kgs/fZxA3mE'),
-                      _cardItem(
-                          'Taman Girli Indah',
-                          'assets/images/card-Girli.png',
-                          'https://maps.app.goo.gl/4VTEmGdRroUU6X267'),
-                    ],
+
+                  const SizedBox(height: 32),
+
+                  // Tourism Section
+                  _enhancedSectionTitle('Wisata Sriharjo', Icons.landscape,
+                      const Color(0xFF2E7D32)),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 200,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(left: 4),
+                      children: [
+                        _enhancedCardItem(
+                            'Srikeminut',
+                            'assets/images/card-kali.png',
+                            'https://g.co/kgs/nPpj3dU',
+                            const Color(0xFF2E7D32)),
+                        _enhancedCardItem(
+                            'Lembah Sorory',
+                            'assets/images/card-sorori.png',
+                            'https://g.co/kgs/fZxA3mE',
+                            const Color(0xFF388E3C)),
+                        _enhancedCardItem(
+                            'Taman Girli Indah',
+                            'assets/images/card-Girli.png',
+                            'https://maps.app.goo.gl/4VTEmGdRroUU6X267',
+                            const Color(0xFF43A047)),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                  _sectionTitle('Potensi Budaya'),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
+
+                  const SizedBox(height: 32),
+
+                  // Culture Section
+                  _enhancedSectionTitle('Potensi Budaya', Icons.theaters,
+                      const Color(0xFFD32F2F)),
+                  const SizedBox(height: 16),
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.8,
                     children: [
-                      _budayaItem('Sekar Wangi Tari', 'assets/images/Tari.png',
-                          'https://jdih.bantulkab.go.id/produkhukum/download/5492/2023/keputusan-bupati-2023-521.pdf.html'),
-                      _budayaItem(
+                      _enhancedBudayaItem(
+                          'Sekar Wangi Tari',
+                          'assets/images/Tari.png',
+                          'https://jdih.bantulkab.go.id/produkhukum/download/5492/2023/keputusan-bupati-2023-521.pdf.html',
+                          const Color(0xFFD32F2F)),
+                      _enhancedBudayaItem(
                           'Sholawat Mudo Palupi',
                           'assets/images/card-sholawat.png',
-                          'https://youtu.be/0WtafW8amDk?si=g_Y7TDCD-IbaC1BF'),
-                      _budayaItem(
+                          'https://youtu.be/0WtafW8amDk?si=g_Y7TDCD-IbaC1BF',
+                          const Color(0xFFC2185B)),
+                      _enhancedBudayaItem(
                           'Jatilan Mudho Langgen',
                           'assets/images/card-jatilan.png',
-                          'https://youtu.be/jDZf9wLp7sM?si=Xb-Bam3Hp8hH4B_V'),
+                          'https://youtu.be/jDZf9wLp7sM?si=Xb-Bam3Hp8hH4B_V',
+                          const Color(0xFF7B1FA2)),
                     ],
                   ),
+
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF5B5835),
-        selectedItemColor: const Color(0xFFE6E3CB),
-        unselectedItemColor: const Color(0xFFE6E3CB),
-        currentIndex: 0,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.pushNamed(context, '/umkm');
-          } else if (index == 2) {
-            Navigator.pushNamed(context, '/profile');
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'UMKM'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: const Color(0xFF5B5835),
+          selectedItemColor: const Color(0xFFCDC99A),
+          unselectedItemColor: const Color(0xFFCDC99A).withOpacity(0.6),
+          currentIndex: 0,
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+          onTap: (index) {
+            if (index == 1) {
+              Navigator.pushNamed(context, '/umkm');
+            } else if (index == 2) {
+              Navigator.pushNamed(context, '/profile');
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.store_rounded),
+              label: 'UMKM',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _pillButton(String text, Color color, VoidCallback onTap) {
+  Widget _enhancedPillButton(
+      String text, Color color, IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _sectionTitle(String title) {
+  Widget _enhancedSectionTitle(String title, IconData icon, Color color) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 20, color: color),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Inter',
+              color: Color(0xFF2C2C2C),
+            ),
           ),
         ),
-        const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF7E7C7C)),
+        Icon(Icons.arrow_forward_ios_rounded,
+            size: 16, color: Colors.grey[400]),
       ],
     );
   }
 
-  Widget _cardItem(String title, String imagePath, String url) {
+  Widget _enhancedCardItem(
+      String title, String imagePath, String url, Color accentColor) {
     return Container(
-      width: 124,
+      width: 160,
+      margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFB3AF8A),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
-            ),
-            child: Image.asset(
-              imagePath,
-              height: 90,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: Image.asset(
+                  imagePath,
+                  height: 110,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(
+                    Icons.landscape,
+                    size: 16,
+                    color: accentColor,
+                  ),
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                const SizedBox(height: 4),
-                GestureDetector(
-                  onTap: () => _launchUrl(url),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF5B5835),
-                      borderRadius: BorderRadius.circular(6),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Color(0xFF2C2C2C),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.location_on, size: 10, color: Colors.white),
-                        SizedBox(width: 2),
-                        Text('Lokasi',
-                            style: TextStyle(fontSize: 8, color: Colors.white)),
-                      ],
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => _launchUrl(url),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: accentColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.location_on_rounded,
+                              size: 14, color: Colors.white),
+                          SizedBox(width: 4),
+                          Text(
+                            'Lokasi',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -251,59 +506,95 @@ class BerandaScreen extends StatelessWidget {
     );
   }
 
-  Widget _budayaItem(String title, String imagePath, String url) {
+  Widget _enhancedBudayaItem(
+      String title, String imagePath, String url, Color accentColor) {
     return Container(
-      width: 124,
       decoration: BoxDecoration(
-        color: const Color(0xFFB3AF8A),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
-            ),
-            child: Image.asset(
-              imagePath,
-              height: 90,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: Image.asset(
+                  imagePath,
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(
+                    Icons.theaters,
+                    size: 16,
+                    color: accentColor,
+                  ),
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                const SizedBox(height: 4),
-                GestureDetector(
-                  onTap: () => _launchUrl(url),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF5B5835),
-                      borderRadius: BorderRadius.circular(6),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Color(0xFF2C2C2C),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
                     ),
-                    child: const Text(
-                      'Selengkapnya',
-                      style: TextStyle(fontSize: 8, color: Colors.white),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => _launchUrl(url),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: accentColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Selengkapnya',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

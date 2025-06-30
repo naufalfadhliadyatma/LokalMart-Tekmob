@@ -11,22 +11,36 @@ class EditProfileScreen extends StatefulWidget {
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _namaController = TextEditingController();
-  final _alamatController = TextEditingController();
-  final _noTeleponController = TextEditingController();
-  String _jenisKelamin = 'Laki-laki';
 
   String avatarUrl = '';
   Uint8List? imageBytes;
   String? fileName;
   bool isLoading = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _loadProfile();
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProfile() async {
@@ -35,16 +49,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     final data = await Supabase.instance.client
         .from('profile')
-        .select('nama, alamat, no_telepon, jenis_kelamin, avatar_url')
+        .select('nama, avatar_url')
         .eq('id', user.id)
         .maybeSingle();
 
     if (data != null) {
       setState(() {
         _namaController.text = data['nama'] ?? '';
-        _alamatController.text = data['alamat'] ?? '';
-        _noTeleponController.text = data['no_telepon'] ?? '';
-        _jenisKelamin = data['jenis_kelamin'] ?? 'Laki-laki';
         avatarUrl = data['avatar_url'] ?? '';
       });
     }
@@ -72,7 +83,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     String? finalAvatarUrl = avatarUrl;
 
-    // Upload avatar baru ke Supabase Storage
     if (imageBytes != null && fileName != null) {
       final storage = Supabase.instance.client.storage;
       final path = 'avatar/$fileName.jpg';
@@ -86,12 +96,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       finalAvatarUrl = storage.from('avatar').getPublicUrl(path);
     }
 
-    // Update data ke Supabase
     await Supabase.instance.client.from('profile').update({
       'nama': _namaController.text.trim(),
-      'alamat': _alamatController.text.trim(),
-      'no_telepon': _noTeleponController.text.trim(),
-      'jenis_kelamin': _jenisKelamin,
       'avatar_url': finalAvatarUrl,
     }).eq('id', user.id);
 
@@ -102,115 +108,305 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE6E3CB),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF5B5835),
-        title: const Text('Edit Profil', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(24),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      // Avatar
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            CircleAvatar(
-                              radius: 45,
-                              backgroundColor: Colors.grey[300],
-                              backgroundImage: imageBytes != null
-                                  ? MemoryImage(imageBytes!)
-                                  : (avatarUrl.isNotEmpty
-                                          ? NetworkImage(avatarUrl)
-                                          : const AssetImage(
-                                              'assets/images/Avatar.png'))
-                                      as ImageProvider,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF5B5835),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.edit,
-                                  size: 16, color: Colors.white),
-                            ),
-                          ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF5B5835),
+              Color(0xFF6B6542),
+              Color(0xFFCDC99A),
+            ],
+            stops: [0.0, 0.3, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom App Bar
+              Container(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new,
+                            color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        'Edit Profil',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      const SizedBox(height: 20),
-
-                      // Input Nama
-                      _buildTextField(_namaController, 'Nama', validator: true),
-                      const SizedBox(height: 16),
-
-                      // Input Alamat
-                      _buildTextField(_alamatController, 'Alamat',
-                          validator: true),
-                      const SizedBox(height: 16),
-
-                      // Input No Telepon
-                      _buildTextField(
-                        _noTeleponController,
-                        'No Telepon',
-                        keyboardType: TextInputType.phone,
-                        validator: true,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Dropdown Jenis Kelamin
-                      DropdownButtonFormField<String>(
-                        value: _jenisKelamin,
-                        decoration: InputDecoration(
-                          labelText: 'Jenis Kelamin',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                              value: 'Laki-laki', child: Text('Laki-laki')),
-                          DropdownMenuItem(
-                              value: 'Perempuan', child: Text('Perempuan')),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) setState(() => _jenisKelamin = val);
-                        },
-                      ),
-                      const SizedBox(height: 30),
-
-                      // Tombol Simpan
-                      ElevatedButton(
-                        onPressed: _updateProfile,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF5B5835),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Simpan Perubahan',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      )
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 48), // Balance the back button
+                  ],
                 ),
               ),
-            ),
+
+              // Content
+              Expanded(
+                child: isLoading
+                    ? Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF5B5835)),
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'Menyimpan perubahan...',
+                                style: TextStyle(
+                                  color: Color(0xFF5B5835),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: Container(
+                          margin: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: SingleChildScrollView(
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  children: [
+                                    // Profile Picture Section
+                                    Container(
+                                      padding: const EdgeInsets.all(24),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            const Color(0xFFCDC99A)
+                                                .withOpacity(0.3),
+                                            const Color(0xFFCDC99A)
+                                                .withOpacity(0.1),
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: _pickImage,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color:
+                                                        const Color(0xFF5B5835)
+                                                            .withOpacity(0.3),
+                                                    blurRadius: 15,
+                                                    offset: const Offset(0, 8),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Stack(
+                                                alignment:
+                                                    Alignment.bottomRight,
+                                                children: [
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(
+                                                        color: const Color(
+                                                            0xFF5B5835),
+                                                        width: 4,
+                                                      ),
+                                                    ),
+                                                    child: CircleAvatar(
+                                                      radius: 60,
+                                                      backgroundColor:
+                                                          const Color(
+                                                              0xFFCDC99A),
+                                                      backgroundImage: imageBytes !=
+                                                              null
+                                                          ? MemoryImage(
+                                                              imageBytes!)
+                                                          : (avatarUrl.isNotEmpty
+                                                                  ? NetworkImage(
+                                                                      avatarUrl)
+                                                                  : const AssetImage(
+                                                                      'assets/images/Avatar.png'))
+                                                              as ImageProvider,
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(
+                                                      gradient:
+                                                          const LinearGradient(
+                                                        colors: [
+                                                          Color(0xFF5B5835),
+                                                          Color(0xFF6B6542)
+                                                        ],
+                                                      ),
+                                                      shape: BoxShape.circle,
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.black
+                                                              .withOpacity(0.2),
+                                                          blurRadius: 8,
+                                                          offset: const Offset(
+                                                              0, 4),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.camera_alt,
+                                                      size: 20,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            'Ketuk untuk mengubah foto',
+                                            style: TextStyle(
+                                              color: const Color(0xFF5B5835)
+                                                  .withOpacity(0.7),
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 32),
+
+                                    // Name Input Section
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Informasi Pribadi',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF5B5835),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        _buildTextField(
+                                            _namaController, 'Nama Lengkap',
+                                            validator: true,
+                                            icon: Icons.person),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 40),
+
+                                    // Save Button
+                                    Container(
+                                      width: double.infinity,
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF5B5835),
+                                            Color(0xFF6B6542)
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(16),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFF5B5835)
+                                                .withOpacity(0.3),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 6),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: _updateProfile,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                          ),
+                                        ),
+                                        child: const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.save_rounded,
+                                              color: Colors.white,
+                                              size: 24,
+                                            ),
+                                            SizedBox(width: 12),
+                                            Text(
+                                              'Simpan Perubahan',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -219,23 +415,94 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     String label, {
     TextInputType keyboardType = TextInputType.text,
     bool validator = false,
+    IconData? icon,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      validator: validator
-          ? (value) {
-              if (value == null || value.trim().isEmpty) {
-                return '$label tidak boleh kosong';
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        validator: validator
+            ? (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return '$label tidak boleh kosong';
+                }
+                return null;
               }
-              return null;
-            }
-          : null,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            : null,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Color(0xFF5B5835),
+          fontWeight: FontWeight.w500,
+        ),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: const Color(0xFF5B5835).withOpacity(0.7),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: icon != null
+              ? Container(
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCDC99A).withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: const Color(0xFF5B5835),
+                    size: 20,
+                  ),
+                )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: const Color(0xFFCDC99A).withOpacity(0.3),
+              width: 2,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(
+              color: Color(0xFF5B5835),
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(
+              color: Colors.red,
+              width: 2,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(
+              color: Colors.red,
+              width: 2,
+            ),
+          ),
+        ),
       ),
     );
   }
